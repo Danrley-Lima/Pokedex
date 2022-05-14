@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { Pokedex } from "./pokedex/Pokedex"
+
 
 export function App() {
-  const [count, setCount] = useState(0)
 
   return (
     <div className="App">
-      <p>Hello World!</p>
+      <Pokedex />
     </div>
   )
 }
