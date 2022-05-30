@@ -11,21 +11,37 @@ import Container from '@mui/material/Container';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import { PokedexCard } from "./components/PokedexCard"
+import { useQuery } from "react-query";
+import { Button, CircularProgress, LinearProgress } from "@mui/material";
 
 
 
 export function Pokedex() {
-  const [pokemons, setPokemons] = useState<PokemonDetail[]>([])
+  // const [pokemons, setPokemons] = useState<PokemonDetail[]>([])
   const [selectedPokemon, setSelectedPokemon] = useState<PokemonListInterface | undefined>(undefined)
 
-  useEffect(() => {
-    listPokemons().then((response) => setPokemons(response.results))
-  }, [])
+
+  const {
+    data,
+    isLoading,
+    isRefetching,
+    isStale,
+    refetch
+  } = useQuery(`listpokemons`, listPokemons, {
+    onSuccess: (data) => console.log("Sucesso!"),
+    onError: (err) => console.log("Erro!"),
+    onSettled: (data) => console.log("Settled!")
+  })
+
+
+  // useEffect(() => {
+  //   listPokemons().then((response) => setPokemons(response.results))
+  // }, [])
 
 
   return (
     <>
-      <AppBar position="static">
+      <AppBar position="static" sx={{ bgcolor: "#da0926" }}>
         <Toolbar>
           <IconButton
             size="large"
@@ -40,29 +56,29 @@ export function Pokedex() {
             Pokedex
           </Typography>
         </Toolbar>
+        {isRefetching && <LinearProgress variant='indeterminate' color='secondary' />}
       </AppBar>
 
       <Container maxWidth="lg" >
-        <Box mt={2}>
-          <Grid container spacing={2}>
-            {pokemons.map((pokemon) => (
+        <div style={{ marginTop: '2em' }}></div>
+        {isStale && (<Button disabled={isRefetching} variant="outlined" onClick={() => refetch()}>Refetch</Button>)}
+        <div style={{ marginTop: '2em' }}></div>
+        {!isLoading ? (
+          <Box mt={2}>
+            <Grid container spacing={2}>
+              {data?.results.map((pokemon) => (
 
-              <React.Fragment key={pokemon.name}>
-                <Grid item xs={6} lg={3} key={pokemon.name}>
-                  <PokedexCard pokemon={pokemon}/>
-                  {/* <CardContent >
-                    <Typography variant="h5" component="div">
-                      {pokemon.name}
-                    </Typography>
-                  </CardContent>
-                  <CardActions>
-                    <Button onClick={() => navigate(`/pokemon/${pokemon.name}`)} size="small">Abrir</Button>
-                  </CardActions> */}
-                </Grid>
-              </React.Fragment>
-            ))}
-          </Grid>
-        </Box>
+                <React.Fragment key={pokemon.name}>
+                  <Grid item xs={12} sm={6} md={4} lg={2} key={pokemon.name}>
+                    <PokedexCard pokemon={pokemon} />
+                  </Grid>
+                </React.Fragment>
+              ))}
+            </Grid>
+          </Box>
+        ) : (
+          <div><CircularProgress /></div>
+        )}
       </Container>
     </>
   )

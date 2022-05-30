@@ -7,24 +7,26 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useEffect, useState } from "react";
 import { PokemonDetail } from "./pokemon/services/interfaces/PokemonDetail";
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { getPokemonDetails } from './pokemon/services/getPokemonDetails';
+import { Button } from '@mui/material';
+import { useQuery } from 'react-query';
 
 export function PokemonDetails() {
+  const navigate = useNavigate();
   const { name } = useParams()
   const [selectedPokemonDetails, setSelectedPokemonDetails] = useState<PokemonDetail | undefined>(undefined)
 
-  useEffect(() => {
-    if (!name) return;
+  const { data } = useQuery(`getPokemonDetails-${name}`, () => getPokemonDetails(name));
 
-    getPokemonDetails(name).then((response) => setSelectedPokemonDetails(response))
-
-  }, [name])
 
   return (
     <>
       <AppBar position="static">
         <Toolbar>
+          <Button onClick={() => navigate(-1)}>
+            <IconButton>Voltar</IconButton>
+          </Button>
           <IconButton
             size="large"
             edge="start"
@@ -42,32 +44,32 @@ export function PokemonDetails() {
 
       <Container maxWidth="lg" >
         <Box mt={2}>
-          <img width="100%" height="auto" src={selectedPokemonDetails?.sprites.front_default} alt="Foto do Pokemon selecionado" />
+          <img width="100%" height="auto" src={data?.sprites.front_default} alt="Foto do Pokemon selecionado" />
         </Box>
         <Typography variant="h2">
-          {selectedPokemonDetails?.name}
+          {data?.name}
         </Typography>
         <Typography>
           <Box>
             Tipos:
-            {selectedPokemonDetails?.types.map((type) => (
+            {data?.types.map((type) => (
               <Typography>{type.type.name}</Typography>
             ))}
           </Box>
           <Box>
             Altura:
-            {selectedPokemonDetails?.height}
+            {data?.height}
           </Box>
           <Box display="flex" flexDirection="row">
             Espécie:
-            {selectedPokemonDetails?.species.name}
+            {data?.species.name}
           </ Box>
 
           <Box display="flex" flexDirection="row">
             Peso:
-            {selectedPokemonDetails?.weight}
+            {data?.weight}
           </ Box>
-          {selectedPokemonDetails?.abilities.map((ability) => (
+          {data?.abilities.map((ability) => (
             <Typography>
               {ability.ability.name}
             </Typography>
